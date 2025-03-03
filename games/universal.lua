@@ -410,11 +410,6 @@ end)
 
 run(function()
 	function whitelist:get(plr)
-		-- Force whitelisting yourself
-		if plr.UserId == 7421025749 then
-			return 10, false, {{text = "OWNER", color = Color3.new(1, 1, 0)}}
-		end
-	
 		local plrstr = self.hashes[plr.Name..plr.UserId]
 		for _, v in self.data.WhitelistedUsers do
 			if v.hash == plrstr then
@@ -422,7 +417,7 @@ run(function()
 			end
 		end
 		return 0, true
-	end	
+	end
 
 	function whitelist:isingame()
 		for _, v in playersService:GetPlayers() do
@@ -605,7 +600,7 @@ run(function()
 			local commit = subbed:find('currentOid')
 			commit = commit and subbed:sub(commit + 13, commit + 52) or nil
 			commit = commit and #commit == 40 and commit or 'main'
-			whitelist.textdata = game:HttpGet('https://raw.githubusercontent.com/whitelist0bot/fadsfdsa/'..commit..'/t.json', true)
+			whitelist.textdata = game:HttpGet('https://raw.githubusercontent.com/wrealaero/MyWhitelistRepo/main/t.json', true)
 		end)
 		if not suc or not hash or not whitelist.get then return true end
 		whitelist.loaded = true
